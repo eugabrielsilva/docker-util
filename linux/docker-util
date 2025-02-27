@@ -1,0 +1,76 @@
+#!/bin/bash
+
+# Verifica se o fzf está instalado
+if ! command -v fzf &> /dev/null; then
+    echo "Erro: fzf não está instalado. Instale-o com 'sudo apt install fzf' ou 'sudo dnf install fzf'."
+    exit 1
+fi
+
+case "$1" in
+    start)
+        echo "Iniciando Docker Compose..."
+        docker compose up -d
+        ;;
+
+    build)
+        if [ -z "$2" ]; then
+            echo "Erro: Nome da imagem não informado!"
+            echo "Uso: docker-util build <imagem>"
+            exit 1
+        fi
+        echo "Construindo imagem Docker: $2"
+        docker build -t "$2" .
+        ;;
+
+    stop)
+        if [ -z "$2" ]; then
+            echo "Nenhum container informado. Selecione um:"
+            container=$(docker ps --format '{{.Names}}' | fzf)
+
+            if [ -z "$container" ]; then
+                echo "Nenhum container selecionado."
+                exit 1
+            fi
+        else
+            container="$2"
+        fi
+
+        echo "Parando container: $container"
+        docker stop "$container"
+        ;;
+
+    stop-all)
+        echo "Parando todos os containers em execução..."
+        docker stop $(docker ps -q)
+        ;;
+
+    bash)
+        if [ -z "$2" ]; then
+            echo "Nenhum container informado. Selecione um:"
+            container=$(docker ps --format '{{.Names}}' | fzf)
+
+            if [ -z "$container" ]; then
+                echo "Nenhum container selecionado."
+                exit 1
+            fi
+        else
+            container="$2"
+        fi
+
+        user=${3:-root}  # Se nenhum usuário for informado, usa 'root'
+
+        echo "Abrindo shell no container '$container' como usuário '$user'..."
+        docker exec -it "$container" bash -c "su - $user"
+        ;;
+
+    *)
+        echo "Uso: docker-util <comando>"
+        echo "Comandos disponíveis:"
+        echo "  start           - Inicia o Docker Compose"
+        echo "  build <img>     - Constrói uma imagem Docker"
+        echo "  stop <cont>     - Para um container específico ou seleciona um se não for informado"
+        echo "  stop-all        - Para todos os containers em execução"
+        echo "  bash <cont> [usr] - Abre Bash dentro de um container (padrão: root)"
+        exit 1
+        ;;
+esac
