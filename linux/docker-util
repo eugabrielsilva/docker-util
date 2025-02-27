@@ -60,7 +60,7 @@ case "$1" in
         user=${3:-root}  # Se nenhum usuário for informado, usa 'root'
 
         echo "Abrindo shell no container '$container' como usuário '$user'..."
-        docker exec -it "$container" bash -c "su - $user"
+        docker exec -it --user "$user" "$container" bash
         ;;
 
     *)
