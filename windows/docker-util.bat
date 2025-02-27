@@ -75,7 +75,7 @@ if "%1"=="bash" (
     )
 
     echo Acessando container '%container%' como usuario '%user%'...
-    docker exec -it %container% cmd
+    docker exec -it --user %user% %container% bash
     exit /b
 )
 
