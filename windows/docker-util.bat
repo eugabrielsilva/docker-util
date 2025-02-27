@@ -1,67 +1,67 @@
 @echo off
 setlocal enabledelayedexpansion
 
-:: Verifica se pelo menos um argumento foi passado
+:: Check if at least one argument was passed
 if "%1"=="" (
     goto usage
 )
 
-:: Comando 'start' para iniciar o Docker Compose
+:: 'start' command to start Docker Compose
 if "%1"=="start" (
-    echo Iniciando Docker Compose...
+    echo Starting Docker Compose...
     docker-compose up -d
     exit /b
 )
 
-:: Comando 'build' para criar uma imagem Docker
+:: 'build' command to create a Docker image
 if "%1"=="build" (
     if "%2"=="" (
-        echo Erro: Nome da imagem nao informado!
-        echo Uso: docker-util build <imagem>
+        echo Error: Image name not provided!
+        echo Usage: docker-util build <image>
         exit /b 1
     )
-    echo Construindo imagem Docker: %2
+    echo Building Docker image: %2
     docker build -t %2 .
     exit /b
 )
 
-:: Comando 'stop' para parar um container específico
+:: 'stop' command to stop a specific container
 if "%1"=="stop" (
     if "%2"=="" (
-        echo Nenhum container informado. Listando containers em execucao:
+        echo No container specified. Listing running containers:
         for /f "delims=" %%i in ('docker ps --format "{{.Names}}"') do (
             echo %%i
         )
-        set /p container=Digite o nome do container: 
+        set /p container=Enter the container name: 
         if "%container%"=="" (
-            echo Nenhum container selecionado.
+            echo No container selected.
             exit /b 1
         )
     ) else (
         set container=%2
     )
-    echo Parando container: %container%
+    echo Stopping container: %container%
     docker stop %container%
     exit /b
 )
 
-:: Comando 'stop-all' para parar todos os containers
+:: 'stop-all' command to stop all containers
 if "%1"=="stop-all" (
-    echo Parando todos os containers em execucao...
+    echo Stopping all running containers...
     for /f "delims=" %%i in ('docker ps -q') do docker stop %%i
     exit /b
 )
 
-:: Comando 'bash' para entrar no container
+:: 'bash' command to enter a container
 if "%1"=="bash" (
     if "%2"=="" (
-        echo Nenhum container informado. Listando containers em execucao:
+        echo No container specified. Listing running containers:
         for /f "delims=" %%i in ('docker ps --format "{{.Names}}"') do (
             echo %%i
         )
-        set /p container=Digite o nome do container: 
+        set /p container=Enter the container name: 
         if "%container%"=="" (
-            echo Nenhum container selecionado.
+            echo No container selected.
             exit /b 1
         )
     ) else (
@@ -74,19 +74,19 @@ if "%1"=="bash" (
         set user=%3
     )
 
-    echo Acessando container '%container%' como usuario '%user%'...
+    echo Accessing container '%container%' as user '%user%'...
     docker exec -it --user %user% %container% bash
     exit /b
 )
 
-:: Caso nenhum comando válido seja passado
+:: If no valid command is provided
 :usage
-echo Uso: docker-util <comando>
+echo Usage: docker-util <command>
 echo.
-echo Comandos disponiveis:
-echo   start             - Inicia o Docker Compose
-echo   build <img>       - Constrói uma imagem Docker
-echo   stop <cont>       - Para um container especifico (ou permite escolher)
-echo   stop-all          - Para todos os containers em execucao
-echo   bash <cont> [usr] - Abre terminal dentro de um container (padrão: root)
+echo Available commands:
+echo   start             - Starts Docker Compose
+echo   build <img>       - Builds a Docker image
+echo   stop <cont>       - Stops a specific container (or allows selection)
+echo   stop-all          - Stops all running containers
+echo   bash <cont> [usr] - Opens a terminal inside a container (default: root)
 exit /b 1
