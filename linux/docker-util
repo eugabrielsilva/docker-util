@@ -44,7 +44,9 @@ case "$1" in
         ;;
 
     bash)
-        if [ -z "$2" ]; then
+        user=${2:-root}  # If no user is specified, use 'root'
+    
+        if [ -z "$3" ]; then
             container=$(docker ps --format '{{.Names}}' | fzf)
 
             if [ -z "$container" ]; then
@@ -52,10 +54,8 @@ case "$1" in
                 exit 1
             fi
         else
-            container="$2"
+            container="$3"
         fi
-
-        user=${3:-root}  # If no user is specified, use 'root'
 
         echo "Opening shell in container '$container' as user '$user'..."
         docker exec -it --user "$user" "$container" bash
@@ -70,7 +70,7 @@ case "$1" in
         fi
 
         echo "Showing stats for container: $container"
-        docker stats "$container"
+        docker stats "$container" --no-stream
         ;;
 
     *)
