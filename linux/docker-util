@@ -21,6 +21,38 @@ case "$1" in
         echo "Building Docker image: $2"
         docker build -t "$2" .
         ;;
+        
+    remove)
+        if [ -z "$2" ]; then
+            container=$(docker ps --format '{{.Names}}' | fzf)
+
+            if [ -z "$container" ]; then
+                echo "No container selected."
+                exit 1
+            fi
+        else
+            container="$2"
+        fi
+
+        echo "Removing container: $container"
+        docker rm "$container"
+        ;;
+        
+    remove-image)
+        if [ -z "$2" ]; then
+            image=$(docker images --format '{{.Repository}}' | fzf)
+
+            if [ -z "$image" ]; then
+                echo "No image selected."
+                exit 1
+            fi
+        else
+            image="$2"
+        fi
+
+        echo "Removing image: $image"
+        docker rmi "$image"
+        ;;
 
     stop)
         if [ -z "$2" ]; then
@@ -76,12 +108,14 @@ case "$1" in
     *)
         echo "Usage: docker-util <command>"
         echo "Available commands:"
-        echo "  start             - Starts Docker Compose"
-        echo "  build <image>     - Builds a Docker image"
-        echo "  stop <cont>       - Stops a specific container or selects one if not provided"
-        echo "  stop-all          - Stops all running containers"
-        echo "  bash [usr] [cont] - Opens a Bash shell inside a container or selects one if not provided (default user: root)"
-        echo "  list              - Lists running containers and shows stats for selected one"
+        echo "  start               - Starts Docker Compose"
+        echo "  build <image>       - Builds a Docker image"
+        echo "  stop <cont>         - Stops a specific container or selects one if not provided"
+        echo "  stop-all            - Stops all running containers"
+        echo "  bash [usr] [cont]   - Opens a Bash shell inside a container or selects one if not provided (default user: root)"
+        echo "  remove [cont]       - Removes a Docker container or selects one if not provided"
+        echo "  remove-image [img]  - Removes a Docker image or selects one if not provided"
+        echo "  list                - Lists running containers and shows stats for selected one"
         exit 1
         ;;
 esac
