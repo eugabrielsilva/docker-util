@@ -76,12 +76,12 @@ case "$1" in
     *)
         echo "Usage: docker-util <command>"
         echo "Available commands:"
-        echo "  start           - Starts Docker Compose"
-        echo "  build <img>     - Builds a Docker image"
-        echo "  stop <cont>     - Stops a specific container or selects one if not provided"
-        echo "  stop-all        - Stops all running containers"
-        echo "  bash <cont> [usr] - Opens a Bash shell inside a container (default: root)"
-        echo "  list            - Lists running containers and shows stats for selected one"
+        echo "  start             - Starts Docker Compose"
+        echo "  build <image>     - Builds a Docker image"
+        echo "  stop <cont>       - Stops a specific container or selects one if not provided"
+        echo "  stop-all          - Stops all running containers"
+        echo "  bash [usr] [cont] - Opens a Bash shell inside a container or selects one if not provided (default user: root)"
+        echo "  list              - Lists running containers and shows stats for selected one"
         exit 1
         ;;
 esac
