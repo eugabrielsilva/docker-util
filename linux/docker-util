@@ -151,7 +151,7 @@ case "$1" in
         echo "  remove [cont]       - Removes a Docker container or selects one if not provided"
         echo "  remove-image [img]  - Removes a Docker image or selects one if not provided"
         echo "  list                - Lists running containers and shows stats for selected one"
-        echo "  clear [type]        - Clears Docker storage"
+        echo "  clear [type]        - Clears Docker resources"
         exit 1
         ;;
 esac
