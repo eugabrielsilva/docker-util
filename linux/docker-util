@@ -24,7 +24,7 @@ case "$1" in
         
     remove)
         if [ -z "$2" ]; then
-            container=$(docker ps --format '{{.Names}}' | fzf)
+            container=$(docker ps --format '{{.Names}}' | fzf --prompt="Choose a container: ")
 
             if [ -z "$container" ]; then
                 echo "No container selected."
@@ -35,12 +35,12 @@ case "$1" in
         fi
 
         echo "Removing container: $container"
-        docker rm "$container"
+        docker rm "$container" --force
         ;;
         
     remove-image)
         if [ -z "$2" ]; then
-            image=$(docker images --format '{{.Repository}}' | fzf)
+            image=$(docker images --format '{{.Repository}}' | fzf --prompt="Choose an image: ")
 
             if [ -z "$image" ]; then
                 echo "No image selected."
@@ -51,12 +51,12 @@ case "$1" in
         fi
 
         echo "Removing image: $image"
-        docker rmi "$image"
+        docker rmi "$image" --force
         ;;
 
     stop)
         if [ -z "$2" ]; then
-            container=$(docker ps --format '{{.Names}}' | fzf)
+            container=$(docker ps --format '{{.Names}}' | fzf --prompt="Choose a container: ")
 
             if [ -z "$container" ]; then
                 echo "No container selected."
@@ -79,7 +79,7 @@ case "$1" in
         user=${2:-root}  # If no user is specified, use 'root'
     
         if [ -z "$3" ]; then
-            container=$(docker ps --format '{{.Names}}' | fzf)
+            container=$(docker ps --format '{{.Names}}' | fzf --prompt="Choose a container: ")
 
             if [ -z "$container" ]; then
                 echo "No container selected."
@@ -94,7 +94,7 @@ case "$1" in
         ;;
 
     list)
-        container=$(docker ps --format '{{.Names}}' | fzf)
+        container=$(docker ps --format '{{.Names}}' | fzf --prompt="Choose a container: ")
 
         if [ -z "$container" ]; then
             echo "No container selected."
@@ -103,6 +103,41 @@ case "$1" in
 
         echo "Showing stats for container: $container"
         docker stats "$container" --no-stream
+        ;;
+        
+    clear)
+        if [ -z "$2" ]; then
+            choice=$(printf "containers\nimages\nvolumes\nnetworks\ncache\nall" | fzf --prompt="What do you want to clear? ")
+        else
+            choice=$2
+        fi
+
+        case "$choice" in
+        "containers")
+            docker container prune -f
+            ;;
+        "images")
+            docker image prune -a -f
+            ;;
+        "volumes")
+            docker volume prune -f
+            ;;
+        "networks")
+            docker network prune -f
+            ;;
+        "cache")
+            docker builder prune -a -f
+            docker buildx prune -a -f
+            ;;
+        "all")
+            docker system prune -a --volumes -f
+            docker builder prune -a -f
+            docker buildx prune -a -f
+            ;;
+        *)
+            echo "No option selected."
+            ;;
+        esac
         ;;
 
     *)
@@ -116,6 +151,7 @@ case "$1" in
         echo "  remove [cont]       - Removes a Docker container or selects one if not provided"
         echo "  remove-image [img]  - Removes a Docker image or selects one if not provided"
         echo "  list                - Lists running containers and shows stats for selected one"
+        echo "  clear [type]        - Clears Docker storage"
         exit 1
         ;;
 esac
